@@ -3,6 +3,7 @@ import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 
 import user from './user'
+import session from './session'
 
 const app: Express = express()
 
@@ -23,6 +24,7 @@ app.get(prefix, (req: Request, res: Response) => {
 })
 
 app.use(`${prefix}/user`, user)
+app.use(`${prefix}/session`, session)
 
 const port = process.env.PORT
 

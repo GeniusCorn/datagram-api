@@ -1,11 +1,12 @@
 import express from 'express'
 import { decode } from 'base-64'
 import db from './db/datagram'
+import { authenticateToken } from './utils/jwt'
 
 const user = express()
 
 // get all users
-user.get('/', async (req, res) => {
+user.get('/', authenticateToken, async (req, res) => {
   const [rows] = await db.execute(
     'SELECT id, account, phone, authority FROM User'
   )
