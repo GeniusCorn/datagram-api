@@ -11,8 +11,10 @@ session.post('/', async (req, res) => {
   const password = decode(req.body.password)
 
   const [rows] = await db.execute(
-    `SELECT account, password FROM User WHERE account = '${account}' AND password = '${password}'`
+    `SELECT account, password, authority FROM User WHERE account = '${account}' AND password = '${password}'`
   )
+
+  const authority = (rows as any[]).at(0).authority
 
   if ((rows as []).length === 0) {
     res.status(401).json({
@@ -25,8 +27,7 @@ session.post('/', async (req, res) => {
       code: 0,
       message: '登录成功',
       data: {
-        rows,
-        token: generateAccessToken(account)
+        token: generateAccessToken(account, authority)
       }
     })
   }

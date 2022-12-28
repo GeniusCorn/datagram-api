@@ -1,12 +1,12 @@
 import express from 'express'
 import { decode } from 'base-64'
 import db from './db/datagram'
-import { authenticateToken } from './utils/jwt'
+import { authenticateAdminToken, authenticateUserToken } from './utils/jwt'
 
 const user = express()
 
 // get all users
-user.get('/', authenticateToken, async (req, res) => {
+user.get('/', authenticateAdminToken, async (req, res) => {
   const [rows] = await db.execute(
     'SELECT id, account, phone, authority FROM User'
   )
@@ -20,7 +20,7 @@ user.get('/', authenticateToken, async (req, res) => {
 })
 
 // get user by account
-user.get('/:account', async (req, res) => {
+user.get('/:account', authenticateUserToken, async (req, res) => {
   const { account } = req.params
   const [rows] = await db.execute(
     `SELECT id, account, phone, authority FROM User WHERE account = '${account}'`
