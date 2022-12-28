@@ -2,7 +2,7 @@ import 'dotenv/config'
 import cors from 'cors'
 import express, { Express, Request, Response } from 'express'
 
-import user from './user'
+import users from './users'
 import session from './session'
 
 const app: Express = express()
@@ -23,7 +23,7 @@ app.get(prefix, (req: Request, res: Response) => {
   res.send('DataGram API')
 })
 
-app.use(`${prefix}/user`, user)
+app.use(`${prefix}/users`, users)
 app.use(`${prefix}/session`, session)
 
 const port = process.env.PORT

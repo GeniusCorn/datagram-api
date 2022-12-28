@@ -1,41 +1,38 @@
 import express from 'express'
 import { decode } from 'base-64'
 import db from './db/datagram'
-import { authenticateAdminToken, authenticateUserToken } from './utils/jwt'
+import { authenticateAdmin, authenticateToken } from './utils/jwt'
 
-const user = express()
-
-// get all users
-user.get('/', authenticateAdminToken, async (req, res) => {
-  const [rows] = await db.execute(
-    'SELECT id, account, phone, authority FROM User'
-  )
-
-  res.status(200).json({
-    code: 0,
-    data: {
-      rows
-    }
-  })
-})
+const users = express()
 
 // get user by account
-user.get('/:account', authenticateUserToken, async (req, res) => {
+users.get('/:account', authenticateToken, async (req, res) => {
   const { account } = req.params
+
   const [rows] = await db.execute(
     `SELECT id, account, phone, authority FROM User WHERE account = '${account}'`
   )
 
   res.status(200).json({
     code: 0,
-    data: {
-      rows
-    }
+    data: rows
+  })
+})
+
+// get all users
+users.get('/', authenticateToken, authenticateAdmin, async (req, res) => {
+  const [rows] = await db.execute(
+    'SELECT id, account, phone, authority FROM User'
+  )
+
+  res.status(200).json({
+    code: 0,
+    data: rows
   })
 })
 
 // register a new user
-user.post('/', async (req, res) => {
+users.post('/', async (req, res) => {
   const account = decode(req.body.account)
   const password = decode(req.body.password)
 
@@ -62,4 +59,20 @@ user.post('/', async (req, res) => {
   }
 })
 
-export default user
+// update user file
+users.put('/', authenticateToken, async (req, res) => {
+  const account = req.body.account
+  const phone = req.body.phone
+
+  const [rows] = await db.execute(
+    `UPDATE User SET phone='${phone}' WHERE account='${account}'`
+  )
+
+  res.status(201).json({
+    code: 0,
+    message: '个人信息更新成功',
+    data: rows
+  })
+})
+
+export default users
