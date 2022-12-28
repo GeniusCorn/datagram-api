@@ -14,7 +14,7 @@ export function generateAccessToken(account: string, authority: string) {
   )
 }
 
-export function authenticateUserToken(
+export function authenticateToken(
   req: Request,
   res: Response,
   next: NextFunction
@@ -40,47 +40,25 @@ export function authenticateUserToken(
           data: error
         })
       }
+
+      req.params.authority = payload.authority
 
       next()
     }
   )
 }
 
-export function authenticateAdminToken(
+export function authenticateAdmin(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
-  const token = req.headers.token
-
-  if (token === null || token === undefined) {
-    return res.status(401).json({
+  if (req.params.authority !== 'admin') {
+    return res.status(404).json({
       code: 1,
-      message: '请登录后再进行操作',
-      data: token
+      message: '权限不足，无法访问'
     })
   }
 
-  verify(
-    token as string,
-    process.env.TOKEN_SECRET as Secret,
-    (error: any, payload: any) => {
-      if (error) {
-        return res.status(403).json({
-          code: 1,
-          message: '登录状态已过期，请重新登录',
-          data: error
-        })
-      }
-
-      if (payload.authority !== 'admin') {
-        return res.status(403).json({
-          code: 1,
-          message: '用户权限不足，无法访问'
-        })
-      } else {
-        next()
-      }
-    }
-  )
+  next()
 }
