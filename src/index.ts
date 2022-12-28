@@ -4,6 +4,7 @@ import express, { Express, Request, Response } from 'express'
 
 import users from './users'
 import session from './session'
+import datasets from './datasets'
 
 const app: Express = express()
 
@@ -25,6 +26,7 @@ app.get(prefix, (req: Request, res: Response) => {
 
 app.use(`${prefix}/users`, users)
 app.use(`${prefix}/session`, session)
+app.use(`${prefix}/datasets`, datasets)
 
 const port = process.env.PORT
 
