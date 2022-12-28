@@ -14,8 +14,6 @@ session.post('/', async (req, res) => {
     `SELECT account, password, authority FROM User WHERE account = '${account}' AND password = '${password}'`
   )
 
-  const authority = (rows as any[]).at(0).authority
-
   if ((rows as []).length === 0) {
     res.status(401).json({
       code: 1,
@@ -23,6 +21,7 @@ session.post('/', async (req, res) => {
       data: rows
     })
   } else {
+    const authority = (rows as any[]).at(0).authority
     res.status(200).json({
       code: 0,
       message: '登录成功',
