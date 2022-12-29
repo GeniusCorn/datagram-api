@@ -16,14 +16,31 @@ datasets.get('/:id', authenticateToken, async (req, res) => {
   })
 })
 
-// get all datasets
+// get datasets
 datasets.get('/', authenticateToken, async (req, res) => {
-  const [rows] = await db.execute(`SELECT * FROM Dataset`)
+  if (Object.hasOwn(req.query, 'account')) {
+    const { account } = req.query
+    const [rows] = await db.execute(
+      `SELECT id FROM User WHERE account='${account}'`
+    )
 
-  res.status(200).json({
-    code: 0,
-    data: rows
-  })
+    const { id } = (rows as any[]).at(0)
+    const [rows1] = await db.execute(
+      `SELECT * FROM Dataset WHERE owner='${id}'`
+    )
+
+    res.status(200).json({
+      code: 0,
+      data: rows1
+    })
+  } else {
+    const [rows] = await db.execute(`SELECT * FROM Dataset`)
+
+    res.status(200).json({
+      code: 0,
+      data: rows
+    })
+  }
 })
 
 // create a new dataset
@@ -45,6 +62,34 @@ datasets.post('/', authenticateToken, async (req, res) => {
     code: 0,
     message: '上传数据集成功',
     data: rows2
+  })
+})
+
+// update dataset name
+datasets.patch('/', authenticateToken, async (req, res) => {
+  const { id, name } = req.body
+
+  const [rows] = await db.execute(
+    `UPDATE Dataset SET name = '${name}' WHERE id='${id}'`
+  )
+
+  res.status(200).json({
+    code: 0,
+    message: '更新数据集名称成功',
+    data: rows
+  })
+})
+
+// delete dataset by id
+datasets.delete('/:id', async (req, res) => {
+  const { id } = req.params
+
+  const [rows] = await db.execute(`DELETE FROM Dataset WHERE id='${id}'`)
+
+  res.status(200).json({
+    code: 0,
+    message: '数据集删除成功',
+    data: rows
   })
 })
 
