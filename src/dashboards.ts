@@ -4,7 +4,7 @@ import { authenticateToken } from './utils/jwt'
 
 const dashboards = express()
 
-// get dataset by id
+// get dashboard by id
 dashboards.get('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params
 
@@ -16,7 +16,7 @@ dashboards.get('/:id', authenticateToken, async (req, res) => {
   })
 })
 
-// get datasets
+// get dashboards
 dashboards.get('/', authenticateToken, async (req, res) => {
   if (Object.hasOwn(req.query, 'account')) {
     const { account } = req.query
@@ -43,9 +43,8 @@ dashboards.get('/', authenticateToken, async (req, res) => {
   }
 })
 
-// create a new dataset
+// create a new dashboard
 dashboards.post('/', authenticateToken, async (req, res) => {
-  const data = JSON.stringify(req.body.data)
   const { account, dashboardName } = req.body
 
   const [rows1] = await db.execute(
@@ -54,18 +53,30 @@ dashboards.post('/', authenticateToken, async (req, res) => {
 
   const id = (rows1 as any[]).at(0).id
 
-  const [rows2] = await db.execute(
-    `INSERT INTO Dataset (id, name, data, owner) VALUES (DEFAULT, '${dashboardName}', '${data}', '${id}')`
+  const [rows3] = await db.execute(
+    `SELECT id, name FROM Dashboard WHERE name=${dashboardName} AND owner=${id}`
   )
 
-  res.status(201).json({
+  if ((rows3 as any[]).length > 0) {
+    return res.status(400).json({
+      code: 1,
+      message: '当前仪表盘名称已经存在',
+      data: rows3
+    })
+  }
+
+  const [rows2] = await db.execute(
+    `INSERT INTO Dashboard (id, name, owner) VALUES (DEFAULT, '${dashboardName}', '${id}')`
+  )
+
+  return res.status(201).json({
     code: 0,
-    message: '上传仪表盘成功',
+    message: '仪表盘创建成功',
     data: rows2
   })
 })
 
-// update dataset name
+// update dashboard
 dashboards.patch('/', authenticateToken, async (req, res) => {
   const { id, name } = req.body
 
