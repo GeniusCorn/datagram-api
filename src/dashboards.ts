@@ -4,18 +4,6 @@ import { authenticateToken } from './utils/jwt'
 
 const dashboards = express()
 
-// get dashboard by id
-dashboards.get('/:id', authenticateToken, async (req, res) => {
-  const { id } = req.params
-
-  const [rows] = await db.execute(`SELECT * FROM Dashboard WHERE id='${id}'`)
-
-  res.status(200).json({
-    code: 0,
-    data: rows
-  })
-})
-
 // get dashboards
 dashboards.get('/', authenticateToken, async (req, res) => {
   if (Object.hasOwn(req.query, 'account')) {
@@ -33,10 +21,18 @@ dashboards.get('/', authenticateToken, async (req, res) => {
       code: 0,
       data: rows1
     })
+  } else if (Object.hasOwn(req.query, 'ID')) {
+    const { ID } = req.query
+    const [rows] = await db.execute(`SELECT * FROM Dashboard WHERE id='${ID}'`)
+
+    return res.status(200).json({
+      code: 0,
+      data: rows
+    })
   } else {
     const [rows] = await db.execute(`SELECT * FROM Dashboard`)
 
-    res.status(200).json({
+    return res.status(200).json({
       code: 0,
       data: rows
     })
