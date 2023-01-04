@@ -49,18 +49,6 @@ dashboards.post('/', authenticateToken, async (req, res) => {
 
   const id = (rows1 as any[]).at(0).id
 
-  const [rows3] = await db.execute(
-    `SELECT id, name FROM Dashboard WHERE name=${dashboardName} AND owner=${id}`
-  )
-
-  if ((rows3 as any[]).length > 0) {
-    return res.status(400).json({
-      code: 1,
-      message: '当前仪表盘名称已经存在',
-      data: rows3
-    })
-  }
-
   const [rows2] = await db.execute(
     `INSERT INTO Dashboard (id, name, owner) VALUES (DEFAULT, '${dashboardName}', '${id}')`
   )
@@ -72,7 +60,7 @@ dashboards.post('/', authenticateToken, async (req, res) => {
   })
 })
 
-// update dashboard
+// rename dashboard
 dashboards.patch('/', authenticateToken, async (req, res) => {
   const { id, name } = req.body
 
@@ -80,9 +68,24 @@ dashboards.patch('/', authenticateToken, async (req, res) => {
     `UPDATE Dashboard SET name = '${name}' WHERE id='${id}'`
   )
 
-  res.status(200).json({
+  return res.status(200).json({
     code: 0,
     message: '更新仪表盘名称成功',
+    data: rows
+  })
+})
+
+dashboards.put('/', authenticateToken, async (req, res) => {
+  const { id, data } = req.body
+
+  console.log(id, data)
+  const [rows] = await db.execute(
+    `UPDATE Dashboard SET data='${data}' WHERE id='${id}'`
+  )
+
+  return res.status(200).json({
+    code: 0,
+    message: '保存成功',
     data: rows
   })
 })
