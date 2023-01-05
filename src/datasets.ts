@@ -54,15 +54,27 @@ datasets.post('/', authenticateToken, async (req, res) => {
 
   const id = (rows1 as any[]).at(0).id
 
-  const [rows2] = await db.execute(
-    `INSERT INTO Dataset (id, name, data, owner) VALUES (DEFAULT, '${datasetName}', '${data}', '${id}')`
+  const [rows3] = await db.execute(
+    `SELECT name FROM Dataset WHERE owner='${id}' AND name='${datasetName}'`
   )
 
-  res.status(201).json({
-    code: 0,
-    message: '上传数据集成功',
-    data: rows2
-  })
+  if ((rows3 as any[]).length > 0) {
+    return res.status(400).json({
+      code: 1,
+      message: '该数据集名称已经存在',
+      data: rows3
+    })
+  } else {
+    const [rows2] = await db.execute(
+      `INSERT INTO Dataset (id, name, data, owner) VALUES (DEFAULT, '${datasetName}', '${data}', '${id}')`
+    )
+
+    return res.status(201).json({
+      code: 0,
+      message: '上传数据集成功',
+      data: rows2
+    })
+  }
 })
 
 // update dataset name
@@ -75,7 +87,7 @@ datasets.patch('/', authenticateToken, async (req, res) => {
 
   res.status(200).json({
     code: 0,
-    message: '更新数据集名称成功',
+    message: '重命名数据集成功',
     data: rows
   })
 })
@@ -88,7 +100,7 @@ datasets.delete('/:id', async (req, res) => {
 
   res.status(200).json({
     code: 0,
-    message: '数据集删除成功',
+    message: '删除数据集成功',
     data: rows
   })
 })

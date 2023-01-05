@@ -55,7 +55,7 @@ dashboards.post('/', authenticateToken, async (req, res) => {
 
   return res.status(201).json({
     code: 0,
-    message: '仪表盘创建成功',
+    message: '创建仪表盘成功',
     data: rows2
   })
 })
@@ -70,7 +70,7 @@ dashboards.patch('/', authenticateToken, async (req, res) => {
 
   return res.status(200).json({
     code: 0,
-    message: '更新仪表盘名称成功',
+    message: '重命名仪表盘成功',
     data: rows
   })
 })
@@ -78,7 +78,6 @@ dashboards.patch('/', authenticateToken, async (req, res) => {
 dashboards.put('/', authenticateToken, async (req, res) => {
   const { id, data } = req.body
 
-  console.log(id, data)
   const [rows] = await db.execute(
     `UPDATE Dashboard SET data='${data}' WHERE id='${id}'`
   )
