@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express'
 
 const options: SignOptions = {
   algorithm: 'HS512',
-  expiresIn: '3000s'
+  expiresIn: '60000s'
 }
 
 export function generateAccessToken(account: string, authority: string) {

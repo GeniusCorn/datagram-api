@@ -1,6 +1,7 @@
 import express from 'express'
 import db from './db/datagram'
 import { authenticateToken } from './utils/jwt'
+import { encode } from 'base-64'
 
 const dashboards = express()
 
@@ -49,8 +50,10 @@ dashboards.post('/', authenticateToken, async (req, res) => {
 
   const id = (rows1 as any[]).at(0).id
 
+  const shareToken = encode(JSON.stringify({ id, dashboardName }))
+
   const [rows2] = await db.execute(
-    `INSERT INTO Dashboard (id, name, owner) VALUES (DEFAULT, '${dashboardName}', '${id}')`
+    `INSERT INTO Dashboard (id, name, owner, share, share_token) VALUES (DEFAULT, '${dashboardName}', '${id}', 0, '${shareToken}')`
   )
 
   return res.status(201).json({
@@ -100,6 +103,54 @@ dashboards.delete('/:id', async (req, res) => {
     message: '仪表盘删除成功',
     data: rows
   })
+})
+
+// share link
+dashboards.get('/share', async (req, res) => {
+  const { owner, dashboardName } = req.query
+
+  const [rows] = await db.execute(
+    `SELECT * FROM Dashboard WHERE owner='${owner}' AND name='${dashboardName}'`
+  )
+
+  const share = (rows as any[]).at(0).share
+  console.log(share)
+
+  if (share === 1) {
+    return res.status(200).json({
+      code: 0,
+      data: rows
+    })
+  } else {
+    return res.status(200).json({
+      code: 1,
+      message: '该图表暂未公开'
+    })
+  }
+})
+
+dashboards.post('/share', async (req, res) => {
+  const { id, value } = req.body
+
+  if (value) {
+    const [rows] = await db.execute(
+      `UPDATE Dashboard SET share='${1}' WHERE id='${id}'`
+    )
+
+    return res.status(201).json({
+      code: 0,
+      data: rows
+    })
+  } else {
+    const [rows] = await db.execute(
+      `UPDATE Dashboard SET share='${0}' WHERE id='${id}'`
+    )
+
+    return res.status(201).json({
+      code: 0,
+      data: rows
+    })
+  }
 })
 
 export default dashboards
