@@ -45,22 +45,36 @@ dashboards.post('/', authenticateToken, async (req, res) => {
   const { account, dashboardName } = req.body
 
   const [rows1] = await db.execute(
-    `SELECT id FROM User WHERE account='${account}'`
+    `SELECT id, authority FROM User WHERE account='${account}'`
   )
 
   const id = (rows1 as any[]).at(0).id
 
-  const shareToken = encode(JSON.stringify({ id, dashboardName }))
-
-  const [rows2] = await db.execute(
-    `INSERT INTO Dashboard (id, name, owner, share, share_token) VALUES (DEFAULT, '${dashboardName}', '${id}', 0, '${shareToken}')`
+  const [rows3] = await db.execute(
+    `SELECT owner FROM Dashboard WHERE owner='${id}'`
   )
 
-  return res.status(201).json({
-    code: 0,
-    message: '创建仪表盘成功',
-    data: rows2
-  })
+  if (
+    (rows1 as any[]).at(0).authority === 'user' &&
+    (rows3 as any[]).length === 2
+  ) {
+    return res.status(200).json({
+      code: 1,
+      message: '未付费用户只允许创建至多两个仪表盘'
+    })
+  } else {
+    const shareToken = encode(JSON.stringify({ id, dashboardName }))
+
+    const [rows2] = await db.execute(
+      `INSERT INTO Dashboard (id, name, owner, share, share_token) VALUES (DEFAULT, '${dashboardName}', '${id}', 0, '${shareToken}')`
+    )
+
+    return res.status(201).json({
+      code: 0,
+      message: '创建仪表盘成功',
+      data: rows2
+    })
+  }
 })
 
 // rename dashboard
