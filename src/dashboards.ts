@@ -56,7 +56,7 @@ dashboards.post('/', authenticateToken, async (req, res) => {
 
   if (
     (rows1 as any[]).at(0).authority === 'user' &&
-    (rows3 as any[]).length === 2
+    (rows3 as any[]).length >= 2
   ) {
     return res.status(200).json({
       code: 1,
