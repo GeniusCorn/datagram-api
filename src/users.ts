@@ -63,16 +63,31 @@ users.post('/', async (req, res) => {
 users.put('/', authenticateToken, async (req, res) => {
   const account = req.body.account
   const phone = req.body.phone
+  const authority = req.body.authority
 
-  const [rows] = await db.execute(
-    `UPDATE User SET phone='${phone}' WHERE account='${account}'`
-  )
+  if (account && phone) {
+    const [rows] = await db.execute(
+      `UPDATE User SET phone='${phone}' WHERE account='${account}'`
+    )
 
-  res.status(200).json({
-    code: 0,
-    message: '个人信息更新成功',
-    data: rows
-  })
+    return res.status(200).json({
+      code: 0,
+      message: '个人信息更新成功',
+      data: rows
+    })
+  }
+
+  if (account && authority) {
+    const [rows] = await db.execute(
+      `UPDATE User SET authority='${authority}' WHERE account='${account}'`
+    )
+
+    return res.status(200).json({
+      code: 0,
+      message: '个人信息更新成功',
+      data: rows
+    })
+  }
 })
 
 // update password
