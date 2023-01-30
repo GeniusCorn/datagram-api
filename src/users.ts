@@ -1,7 +1,7 @@
 import express from 'express'
 import { decode } from 'base-64'
 import db from './db/datagram'
-import { authenticateAdmin, authenticateToken } from './utils/jwt'
+import { authenticateAdmin, authenticateToken, getAccount } from './utils/jwt'
 
 const users = express()
 
@@ -80,6 +80,14 @@ users.put('/', authenticateToken, async (req, res) => {
   if (account && authority) {
     const [rows] = await db.execute(
       `UPDATE User SET authority='${authority}' WHERE account='${account}'`
+    )
+
+    const token = req.headers.token
+
+    const operatedAccount = getAccount(token as string)
+
+    const [rows1] = await db.execute(
+      `INSERT INTO Record (account, operation) VALUES ('${operatedAccount}', '将 ${account} 的权限更改为 ${authority}')`
     )
 
     return res.status(200).json({

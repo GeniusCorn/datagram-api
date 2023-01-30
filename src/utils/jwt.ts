@@ -62,3 +62,17 @@ export function authenticateAdmin(
 
   next()
 }
+
+export function getAccount(token: string): string {
+  let account: string = ''
+
+  verify(
+    token,
+    process.env.TOKEN_SECRET as string,
+    (error: any, payload: any) => {
+      account = payload.account
+    }
+  )
+
+  return account
+}

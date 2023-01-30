@@ -7,6 +7,7 @@ import session from './session'
 import datasets from './datasets'
 import dashboards from './dashboards'
 import api from './api'
+import records from './records'
 
 const app: Express = express()
 
@@ -31,6 +32,7 @@ app.use(`${prefix}/session`, session)
 app.use(`${prefix}/datasets`, datasets)
 app.use(`${prefix}/dashboards`, dashboards)
 app.use(`${prefix}/api`, api)
+app.use(`${prefix}/records`, records)
 
 const port = process.env.PORT
 
