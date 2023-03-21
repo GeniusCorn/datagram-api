@@ -1,7 +1,7 @@
 import express from 'express'
 import db from './db/datagram'
 import { authenticateToken } from './utils/jwt'
-import { encode } from 'base-64'
+import { v4 as uuidv4 } from 'uuid'
 
 const dashboards = express()
 
@@ -42,7 +42,7 @@ dashboards.get('/', authenticateToken, async (req, res) => {
 
 // create a new dashboard
 dashboards.post('/', authenticateToken, async (req, res) => {
-  const { account, dashboardName } = req.body
+  const { account, name } = req.body
 
   const [rows1] = await db.execute(
     `SELECT id, authority FROM User WHERE account='${account}'`
@@ -63,10 +63,10 @@ dashboards.post('/', authenticateToken, async (req, res) => {
       message: '未付费用户只允许创建至多两个仪表盘'
     })
   } else {
-    const shareToken = encode(JSON.stringify({ id, dashboardName }))
+    const shareToken = uuidv4()
 
     const [rows2] = await db.execute(
-      `INSERT INTO Dashboard (id, name, owner, share, share_token) VALUES (DEFAULT, '${dashboardName}', '${id}', 0, '${shareToken}')`
+      `INSERT INTO Dashboard (id, name, owner, share, share_token) VALUES (DEFAULT, '${name}', '${id}', 0, '${shareToken}')`
     )
 
     return res.status(201).json({
