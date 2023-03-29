@@ -121,14 +121,13 @@ dashboards.delete('/:id', async (req, res) => {
 
 // share link
 dashboards.get('/share', async (req, res) => {
-  const { owner, dashboardName } = req.query
+  const { token } = req.query
 
   const [rows] = await db.execute(
-    `SELECT * FROM Dashboard WHERE owner='${owner}' AND name='${dashboardName}'`
+    `SELECT * FROM Dashboard WHERE share_token='${token}'`
   )
 
   const share = (rows as any[]).at(0).share
-  console.log(share)
 
   if (share === 1) {
     return res.status(200).json({
